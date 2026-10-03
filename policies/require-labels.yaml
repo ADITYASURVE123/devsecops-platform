@@ -1,0 +1,17 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-labels
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: required-labels
+      match: { any: [{ resources: { kinds: [Pod], namespaces: [apps] } }] }
+      validate:
+        message: "Pods need labels app.kubernetes.io/name and app.kubernetes.io/part-of."
+        pattern:
+          metadata:
+            labels:
+              app.kubernetes.io/name: "?*"
+              app.kubernetes.io/part-of: "?*"

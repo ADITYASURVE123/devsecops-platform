@@ -1,0 +1,15 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}
+  labels: {{- include "svc.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+  # copies the Rollouts hash label onto metrics so analysis can isolate canary pods
+  podTargetLabels: ["rollouts-pod-template-hash"]
+  endpoints:
+    - { port: http, path: /metrics, interval: 15s }
+{{- end }}

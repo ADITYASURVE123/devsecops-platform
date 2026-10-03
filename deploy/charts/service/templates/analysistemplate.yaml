@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ .Release.Name }}-canary-health
+spec:
+  args:
+    - name: service
+    - name: canary-hash
+  metrics:
+    - name: error-rate
+      interval: {{ .Values.canary.analysis.intervalSeconds }}s
+      initialDelay: 30s
+      failureLimit: {{ .Values.canary.analysis.failureLimit }}
+      # an empty result (no traffic yet) is treated as healthy
+      successCondition: len(result) == 0 || result[0] < {{ .Values.canary.analysis.errorRateMax }}
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+          query: |
+            sum(rate(http_requests_total{service="{{`{{args.service}}`}}",rollouts_pod_template_hash="{{`{{args.canary-hash}}`}}",status=~"5.."}[1m]))
+            /
+            sum(rate(http_requests_total{service="{{`{{args.service}}`}}",rollouts_pod_template_hash="{{`{{args.canary-hash}}`}}"}[1m]))
+    - name: p95-latency
+      interval: {{ .Values.canary.analysis.intervalSeconds }}s
+      initialDelay: 30s
+      failureLimit: {{ .Values.canary.analysis.failureLimit }}
+      successCondition: len(result) == 0 || result[0] < {{ .Values.canary.analysis.p95LatencySecondsMax }}
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+          query: |
+            histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service="{{`{{args.service}}`}}",rollouts_pod_template_hash="{{`{{args.canary-hash}}`}}"}[1m])))

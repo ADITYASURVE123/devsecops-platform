@@ -1,0 +1,24 @@
+# Apply with (see Makefile 'bootstrap'):
+#   ENV=kind REPO_URL=https://github.com/<you>/devsecops-platform.git ESO_ENABLED=false \
+#   ESO_ROLE_ARN="" AWS_REGION=us-east-1 envsubst < root.yaml | kubectl apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ${REPO_URL}
+    targetRevision: main
+    path: deploy/argocd/bootstrap
+    helm:
+      parameters:
+        - { name: repoURL, value: "${REPO_URL}" }
+        - { name: env, value: "${ENV}" }
+        - { name: externalSecrets.enabled, value: "${ESO_ENABLED}" }
+        - { name: externalSecrets.roleArn, value: "${ESO_ROLE_ARN}" }
+        - { name: externalSecrets.region, value: "${AWS_REGION}" }
+  destination: { server: https://kubernetes.default.svc, namespace: argocd }
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }

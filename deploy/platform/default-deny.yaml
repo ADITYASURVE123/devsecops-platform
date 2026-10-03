@@ -1,0 +1,9 @@
+# Default-deny ingress for the workloads namespace; each service chart adds its own allow rule.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: apps
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]

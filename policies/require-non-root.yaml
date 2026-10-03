@@ -1,0 +1,18 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-run-as-non-root
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: non-root
+      match: { any: [{ resources: { kinds: [Pod], namespaces: [apps] } }] }
+      validate:
+        message: "Containers must set runAsNonRoot: true and disallow privilege escalation."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  runAsNonRoot: true
+                  allowPrivilegeEscalation: false

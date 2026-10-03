@@ -1,0 +1,69 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: platform-alerts
+  namespace: monitoring
+spec:
+  groups:
+    - name: slo.recording
+      rules:
+        # SLO: 99.5% of requests are non-5xx over 30 days
+        - record: slo:availability:ratio_rate5m
+          expr: |
+            1 - (sum by (service) (rate(http_requests_total{status=~"5.."}[5m]))
+            / sum by (service) (rate(http_requests_total[5m])))
+        - record: slo:availability:ratio_rate30d
+          expr: |
+            1 - (sum by (service) (increase(http_requests_total{status=~"5.."}[30d]))
+            / sum by (service) (increase(http_requests_total[30d])))
+        - record: slo:error_budget:remaining_ratio
+          expr: 1 - ((1 - slo:availability:ratio_rate30d) / (1 - 0.995))
+    - name: service.alerts
+      rules:
+        - alert: HighErrorRate
+          expr: |
+            sum by (service) (rate(http_requests_total{status=~"5.."}[5m]))
+            / sum by (service) (rate(http_requests_total[5m])) > 0.05
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "{{ $labels.service }} 5xx ratio above 5% for 5m"
+            runbook: docs/runbooks/bad-deploy.md
+        - alert: ErrorBudgetFastBurn
+          expr: (1 - slo:availability:ratio_rate5m) > (14.4 * (1 - 0.995))
+          for: 5m
+          labels: { severity: critical }
+          annotations:
+            summary: "{{ $labels.service }} is burning the 30d error budget 14x too fast"
+            runbook: docs/runbooks/bad-deploy.md
+        - alert: HighLatencyP95
+          expr: |
+            histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket[5m]))) > 0.5
+          for: 5m
+          labels: { severity: warning }
+          annotations:
+            summary: "{{ $labels.service }} p95 latency above 500ms for 5m"
+            runbook: docs/runbooks/high-latency.md
+        - alert: PodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace="apps"}[10m]) > 3
+          for: 2m
+          labels: { severity: critical }
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.pod }} restarted >3 times in 10m"
+            runbook: docs/runbooks/pod-crashloop.md
+        - alert: RolloutAborted
+          expr: rollout_info{phase="Degraded"} == 1
+          for: 1m
+          labels: { severity: warning }
+          annotations:
+            summary: "Rollout {{ $labels.name }} aborted and rolled back"
+            runbook: docs/runbooks/bad-deploy.md
+    - name: node.alerts
+      rules:
+        - alert: NodePressure
+          expr: kube_node_status_condition{condition=~"MemoryPressure|DiskPressure|PIDPressure",status="true"} == 1
+          for: 5m
+          labels: { severity: warning }
+          annotations:
+            summary: "Node {{ $labels.node }} under {{ $labels.condition }}"
+            runbook: docs/runbooks/high-latency.md

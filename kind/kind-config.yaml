@@ -1,0 +1,4 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane   # single node keeps RAM use down on 8 GB laptops

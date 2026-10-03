@@ -1,0 +1,8 @@
+repoURL: https://github.com/<YOUR_GH_USER>/devsecops-platform.git
+targetRevision: main
+env: dev
+services: [orders-api, inventory-api]
+externalSecrets:
+  enabled: "false"
+  roleArn: ""
+  region: us-east-1

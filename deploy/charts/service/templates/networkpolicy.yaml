@@ -1,0 +1,20 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-ingress
+  labels: {{- include "svc.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: {}   # same namespace (loadgen, other services)
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring   # Prometheus scrape
+      ports:
+        - { protocol: TCP, port: {{ .Values.port }} }
+{{- end }}

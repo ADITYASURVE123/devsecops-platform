@@ -1,0 +1,4 @@
+apiVersion: v2
+name: bootstrap
+description: App-of-apps. One Application per service and per platform component.
+version: 0.1.0

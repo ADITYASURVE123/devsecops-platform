@@ -1,0 +1,5 @@
+# Lean install for small clusters (single replicas). Use 3 admission replicas for real HA.
+admissionController: { replicas: 1 }
+backgroundController: { replicas: 1 }
+cleanupController: { replicas: 1 }
+reportsController: { replicas: 1 }

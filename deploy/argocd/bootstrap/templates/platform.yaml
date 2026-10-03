@@ -1,0 +1,94 @@
+---
+{{ include "helmapp" (dict "name" "argo-rollouts" "wave" "0" "chartRepo" "https://argoproj.github.io/argo-helm" "chart" "argo-rollouts" "version" "2.37.7" "valuesFile" "$values/deploy/argocd/values/argo-rollouts.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "argo-rollouts") }}
+---
+{{ include "helmapp" (dict "name" "kube-prometheus-stack" "wave" "0" "chartRepo" "https://prometheus-community.github.io/helm-charts" "chart" "kube-prometheus-stack" "version" "65.5.0" "valuesFile" "$values/observability/kube-prometheus-stack-values.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "monitoring") }}
+---
+{{ include "helmapp" (dict "name" "kyverno" "wave" "0" "chartRepo" "https://kyverno.github.io/kyverno" "chart" "kyverno" "version" "3.2.7" "valuesFile" "$values/deploy/argocd/values/kyverno.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "kyverno") }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform-config
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
+    path: deploy/platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: apps
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, SkipDryRunOnMissingResource=true]
+    retry: { limit: 10, backoff: { duration: 15s, factor: 2, maxDuration: 5m } }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: policies
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
+    path: policies
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kyverno
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [SkipDryRunOnMissingResource=true]
+    retry: { limit: 10, backoff: { duration: 15s, factor: 2, maxDuration: 5m } }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
+    path: observability/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, SkipDryRunOnMissingResource=true]
+    retry: { limit: 10, backoff: { duration: 15s, factor: 2, maxDuration: 5m } }
+{{- if eq .Values.externalSecrets.enabled "true" }}
+---
+{{ include "helmapp" (dict "name" "external-secrets" "wave" "0" "chartRepo" "https://charts.external-secrets.io" "chart" "external-secrets" "version" "0.10.4" "valuesFile" "$values/deploy/argocd/values/external-secrets.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "external-secrets" "extraValues" (dict "serviceAccount" (dict "annotations" (dict "eks.amazonaws.com/role-arn" .Values.externalSecrets.roleArn)))) }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: externalsecrets-config
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.repoURL }}
+    targetRevision: {{ .Values.targetRevision }}
+    path: deploy/externalsecrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [SkipDryRunOnMissingResource=true]
+    retry: { limit: 10, backoff: { duration: 15s, factor: 2, maxDuration: 5m } }
+{{- end }}

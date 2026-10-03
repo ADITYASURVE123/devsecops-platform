@@ -1,0 +1,10 @@
+image:
+  repository: "inventory-api"
+  tag: "dev"
+  pullPolicy: Never      # image is loaded into kind with 'kind load docker-image'
+replicas: 2
+hpa:
+  max: 3
+env:
+  ERROR_RATE: "0"
+  LATENCY_MS: "0"

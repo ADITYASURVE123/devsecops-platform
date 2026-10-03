@@ -1,0 +1,14 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+coverage.xml
+.coverage
+.terraform/
+*.tfstate*
+*.tfvars
+!*.tfvars.example
+backend.hcl
+sbom-*.json
+diff.txt
+*.zip

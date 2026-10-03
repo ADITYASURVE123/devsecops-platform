@@ -1,0 +1,6 @@
+image:
+  repository: "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/orders-api"
+  tag: "bootstrap"
+env:
+  ERROR_RATE: "0"
+  LATENCY_MS: "0"

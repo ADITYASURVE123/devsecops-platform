@@ -1,0 +1,30 @@
+image:
+  repository: "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/service"
+  tag: "bootstrap"            # CI bumps this; Kyverno blocks ":latest"
+  pullPolicy: IfNotPresent
+replicas: 4
+port: 8000
+env:
+  ERROR_RATE: "0"
+  LATENCY_MS: "0"
+resources:
+  requests: { cpu: 50m, memory: 64Mi }
+  limits: { cpu: 250m, memory: 128Mi }
+canary:
+  weights: [25, 50]           # then 100 after the last pause
+  pauseSeconds: 60
+  analysis:
+    errorRateMax: 0.05        # 5% 5xx
+    p95LatencySecondsMax: 0.5
+    intervalSeconds: 20
+    failureLimit: 2
+hpa:
+  enabled: true
+  max: 6
+  cpuTarget: 70
+pdb:
+  maxUnavailable: 1
+networkPolicy:
+  enabled: true               # enforced on EKS (VPC CNI); kind's default CNI ignores it
+serviceMonitor:
+  enabled: true

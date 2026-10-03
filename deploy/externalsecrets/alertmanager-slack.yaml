@@ -1,0 +1,13 @@
+# Create the parameter once:  aws ssm put-parameter --name /devsecops/alertmanager/slack-webhook --type SecureString --value '<webhook>'
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: alertmanager-slack
+  namespace: monitoring
+spec:
+  refreshInterval: 1h
+  secretStoreRef: { name: aws-ssm, kind: ClusterSecretStore }
+  target: { name: alertmanager-slack }
+  data:
+    - secretKey: webhook-url
+      remoteRef: { key: /devsecops/alertmanager/slack-webhook }
