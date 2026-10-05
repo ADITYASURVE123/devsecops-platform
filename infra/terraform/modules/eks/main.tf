@@ -36,7 +36,7 @@ module "eks" {
   eks_managed_node_groups = {
     default = {
       instance_types = [var.node_instance_type]
-      capacity_type  = "SPOT" # cheaper; fine for a demo
+      capacity_type  = "ON_DEMAND" # cheaper; fine for a demo
       min_size       = 1
       max_size       = 3
       desired_size   = 2
