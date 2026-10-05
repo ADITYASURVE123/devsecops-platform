@@ -3,7 +3,7 @@ variable "vpc_id" { type = string }
 variable "subnet_ids" { type = list(string) }
 variable "node_instance_type" {
   type    = string
-  default = "t3.micro"
+  default = "c7i-flex.large"
 }
 variable "api_allowed_cidrs" {
   type        = list(string)
