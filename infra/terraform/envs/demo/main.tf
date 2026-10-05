@@ -35,11 +35,11 @@ module "jenkins" {
 
 module "eks" {
   source             = "../../modules/eks"
-  cluster_name       = "${var.name}-eks"
+  cluster_name       = "devsecops-eks"
   vpc_id             = module.vpc.vpc_id
-  subnet_ids         = module.vpc.private_subnets
-  node_instance_type = var.node_instance_type
-  api_allowed_cidrs  = [var.my_ip_cidr]
+  subnet_ids         = module.vpc.private_subnets  # MUST BE PRIVATE SUBNETS
+  node_instance_type = "t3.medium"
+  api_allowed_cidrs  = ["0.0.0.0/0"]
 }
 
 # Cost guard: email at 80% actual and 100% forecast.
