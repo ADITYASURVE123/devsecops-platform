@@ -40,7 +40,9 @@ make destroy
 Tip for 8 GB machines: wait for each Argo app to go Healthy before opening dashboards, and close other heavy apps. If it still thrashes, set `retention`/replicas lower or sync platform apps one at a time.
 
 ## AWS demo (costs money; read docs/cost-notes.md first)
-`make tf-bootstrap`, fill `backend.hcl` and `terraform.tfvars` (copy the `.example` files), `make eks-up`, then follow `docs/jenkins-setup.md`. Always finish with `make eks-down`.
+AWS regional resources and the Terraform state bucket are configured for `ap-south-1`. Follow the detailed [AWS execution steps](EXECUTION_STEPS.md): configure AWS credentials for that region, bootstrap the state bucket, copy and fill in the Terraform example files, then run `make eks-up`. Configure Jenkins as described in [docs/jenkins-setup.md](docs/jenkins-setup.md), and always finish with `make eks-down`.
+
+The project rejects other region values in Make and Terraform. AWS IAM and AWS Budgets are account-global services; their roles and budget alert are associated with this deployment but do not reside in a particular AWS region.
 
 ## Failure handling
 Runbooks for the three required incidents: [bad deploy](docs/runbooks/bad-deploy.md), [pod crashloop](docs/runbooks/pod-crashloop.md), [high latency](docs/runbooks/high-latency.md). Each maps to a Prometheus alert.

@@ -1,6 +1,6 @@
 # Apply with (see Makefile 'bootstrap'):
 #   ENV=kind REPO_URL=https://github.com/<you>/devsecops-platform.git ESO_ENABLED=false \
-#   ESO_ROLE_ARN="" AWS_REGION=us-east-1 envsubst < root.yaml | kubectl apply -f -
+#   ESO_ROLE_ARN="" AWS_REGION=ap-south-1 envsubst < root.yaml | kubectl apply -f -
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

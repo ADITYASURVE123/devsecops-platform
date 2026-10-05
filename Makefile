@@ -5,11 +5,11 @@ TAG          ?= dev
 ENV          ?= kind
 REPO_URL     ?= $(shell git remote get-url origin 2>/dev/null)
 ARGOCD_VER   ?= v2.12.4
-AWS_REGION   ?= us-east-1
+AWS_REGION   ?= ap-south-1
 TF_DIR       := infra/terraform/envs/demo
 
 .PHONY: help lint test ai-test build kind-up kind-load bootstrap up destroy helm-lint \
-	    tf-bootstrap tf-init eks-up eks-down jenkins-stop jenkins-start
+	    tf-bootstrap tf-init eks-up eks-down jenkins-stop jenkins-start check-aws-region
 
 help:           ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/ -/'
@@ -50,6 +50,11 @@ destroy:        ## delete the local cluster
 
 tf-bootstrap:   ## one-time: S3 bucket for remote state (native S3 locking)
 	cd infra/terraform/bootstrap && terraform init && terraform apply
+
+check-aws-region:
+	@test "$(AWS_REGION)" = "ap-south-1" || { echo "AWS_REGION must be ap-south-1 for this project"; exit 1; }
+
+tf-bootstrap tf-init eks-up eks-down jenkins-stop jenkins-start: check-aws-region
 
 tf-init:
 	cd $(TF_DIR) && terraform init -backend-config=backend.hcl

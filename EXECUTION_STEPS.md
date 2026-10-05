@@ -2,6 +2,7 @@
 
 > **Stack:** VPC → ECR → Jenkins EC2 → EKS → Argo CD (GitOps) → Kyverno + ESO + Prometheus  
 > **Cost warning:** EKS (~$0.10/h) + NAT Gateway + Spot nodes.  Run `make eks-down` when done.
+> Regional AWS resources and the Terraform state bucket are restricted to `ap-south-1`. IAM and AWS Budgets are account-global services.
 
 ---
 
@@ -26,7 +27,7 @@
 aws configure
 # AWS Access Key ID     : <your-access-key>
 # AWS Secret Access Key : <your-secret-key>
-# Default region name   : us-east-1
+# Default region name   : ap-south-1
 # Default output format : json
 ```
 
@@ -34,6 +35,8 @@ aws configure
 
 ```bash
 aws sts get-caller-identity
+aws configure get region
+# Confirm the configured region is ap-south-1 before continuing.
 ```
 
 Expected output — you should see your account ID, not an error:
@@ -64,7 +67,7 @@ This creates an S3 bucket to store Terraform state so it is never lost.
 ```bash
 cd infra/terraform/bootstrap
 terraform init
-terraform apply -var="bucket_name=devsecops-tfstate-<YOUR_AWS_ACCOUNT_ID>"
+terraform apply -var="region=ap-south-1" -var="bucket_name=devsecops-tfstate-<YOUR_AWS_ACCOUNT_ID>"
 # Type  yes  when prompted
 ```
 
@@ -87,7 +90,7 @@ Edit `backend.hcl` — replace `<YOUR_STATE_BUCKET>` with your actual bucket nam
 ```hcl
 bucket       = "devsecops-tfstate-<YOUR_AWS_ACCOUNT_ID>"
 key          = "demo/terraform.tfstate"
-region       = "us-east-1"
+region       = "ap-south-1"
 encrypt      = true
 use_lockfile = true
 ```
@@ -107,7 +110,7 @@ budget_email = "you@example.com"    # email to receive cost alerts
 
 > Optional overrides (defaults are fine for a demo):
 > ```hcl
-> region                = "us-east-1"
+> region                = "ap-south-1"
 > name                  = "devsecops"
 > budget_usd            = 10
 > jenkins_instance_type = "t3.small"
@@ -143,6 +146,8 @@ Resources created: VPC, subnets, NAT gateway, ECR repos (`orders-api`, `inventor
 
 ### 3.3 Apply — this provisions everything (~15–20 min)
 
+Before running `make eks-up`, push this repository to GitHub as described in Phase 4. This target also bootstraps Argo CD, which needs to fetch the repository. If you want to provision first, use the manual `terraform apply` below, then continue with Phases 4 and 5.
+
 ```bash
 # From the repo root:
 make eks-up
@@ -156,7 +161,7 @@ terraform apply          # type  yes  when prompted  (~15 min)
 
 # Then update local kubeconfig:
 aws eks update-kubeconfig \
-  --region us-east-1 \
+  --region ap-south-1 \
   --name $(terraform output -raw cluster_name)
 ```
 
@@ -169,7 +174,7 @@ kubectl get nodes
 
 ---
 
-## Phase 4 — Push This Repo to GitHub
+## Phase 4 — Push This Repo to GitHub (complete before `make eks-up`)
 
 Argo CD pulls from GitHub, so your repo must be public (or use a deploy key for private).
 
@@ -199,7 +204,7 @@ ENV=dev \
 REPO_URL=https://github.com/<YOUR_GITHUB_USERNAME>/devsecops-platform.git \
 ESO_ENABLED=true \
 ESO_ROLE_ARN=$(cd infra/terraform/envs/demo && terraform output -raw external_secrets_role_arn) \
-AWS_REGION=us-east-1 \
+AWS_REGION=ap-south-1 \
 make bootstrap
 ```
 
@@ -274,8 +279,8 @@ Go to **Manage Jenkins → Credentials → Global → Add Credential**:
 
 | Variable | Value |
 |----------|-------|
-| `AWS_REGION` | `us-east-1` |
-| `ECR_REGISTRY` | `<AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com` |
+| `AWS_REGION` | `ap-south-1` |
+| `ECR_REGISTRY` | `<AWS_ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com` |
 | `OLLAMA_URL` | `http://localhost:11434` *(optional — AI reviewer)* |
 
 ### 6.6 Configure SonarQube server
@@ -327,8 +332,8 @@ GitOps: bump image tag
 ### 7.3 Verify images in ECR
 
 ```bash
-aws ecr describe-images --repository-name orders-api --region us-east-1
-aws ecr describe-images --repository-name inventory-api --region us-east-1
+aws ecr describe-images --repository-name orders-api --region ap-south-1
+aws ecr describe-images --repository-name inventory-api --region ap-south-1
 ```
 
 ### 7.4 Verify Argo CD synced the new tag

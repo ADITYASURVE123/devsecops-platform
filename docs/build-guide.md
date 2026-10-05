@@ -17,11 +17,12 @@ Q: Why multi-stage and non-root? Why label metrics by route template, not raw pa
 
 ## Phase 2: Terraform (EKS costs money from here)
 ```bash
-cd infra/terraform/bootstrap && terraform init && terraform apply -var bucket_name=<unique>
+cd infra/terraform/bootstrap && terraform init && terraform apply -var region=ap-south-1 -var bucket_name=<unique>
 cd ../envs/demo && cp backend.hcl.example backend.hcl && cp terraform.tfvars.example terraform.tfvars   # edit both
 make tf-init && terraform -chdir=infra/terraform/envs/demo plan
 ```
-Verify: plan shows VPC, 2 ECR repos, Jenkins EC2 + instance profile, EKS, budget. Run `terraform fmt -recursive` and `terraform validate` first; I could not run them offline.
+Both the state bucket (`backend.hcl`) and the regional infrastructure must use `ap-south-1`; Terraform and Make reject another deployment region. AWS IAM and Budgets are account-global services.
+Verify: plan shows VPC, 2 ECR repos, Jenkins EC2 + instance profile, EKS with On-Demand nodes, budget. Run `terraform fmt -recursive` and `terraform validate` first; I could not run them offline.
 Q: Why remote state with locking? Why an instance profile instead of access keys? Why IMMUTABLE ECR tags?
 
 ## Phase 3: Jenkins CI (see `docs/jenkins-setup.md`)

@@ -8,6 +8,10 @@ terraform {
 variable "region" {
   type    = string
   default = "ap-south-1"
+  validation {
+    condition     = var.region == "ap-south-1"
+    error_message = "The Terraform state bucket must be created in ap-south-1."
+  }
 }
 
 variable "bucket_name" {

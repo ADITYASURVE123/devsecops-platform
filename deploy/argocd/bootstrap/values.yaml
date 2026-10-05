@@ -5,4 +5,4 @@ services: [orders-api, inventory-api]
 externalSecrets:
   enabled: "false"
   roleArn: ""
-  region: us-east-1
+  region: ap-south-1

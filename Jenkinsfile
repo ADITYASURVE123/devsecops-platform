@@ -12,7 +12,7 @@ pipeline {
   }
 
   environment {
-    AWS_REGION   = "${env.AWS_REGION ?: 'us-east-1'}"
+    AWS_REGION   = "${env.AWS_REGION ?: 'ap-south-1'}"
     ECR_REGISTRY = "${env.ECR_REGISTRY ?: '<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com'}"
     IMAGE_TAG    = "${env.GIT_COMMIT?.take(8) ?: 'local'}"
     SERVICES     = 'orders-api inventory-api'

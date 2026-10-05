@@ -1,6 +1,10 @@
 variable "region" {
   type    = string
-  default = "us-east-1"
+  default = "ap-south-1"
+  validation {
+    condition     = var.region == "ap-south-1"
+    error_message = "This project provisions AWS resources in ap-south-1 only."
+  }
 }
 variable "name" {
   type    = string
