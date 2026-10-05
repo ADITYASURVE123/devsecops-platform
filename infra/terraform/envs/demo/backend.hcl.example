@@ -1,5 +1,5 @@
-bucket       = "<YOUR_STATE_BUCKET>"
+bucket       = "devsecops-tfstate-911784620606"
 key          = "demo/terraform.tfstate"
-region       = "us-east-1"
+region       = "ap-south-1"
 encrypt      = true
 use_lockfile = true
