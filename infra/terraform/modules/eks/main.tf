@@ -3,7 +3,7 @@ variable "vpc_id" { type = string }
 variable "subnet_ids" { type = list(string) }
 variable "node_instance_type" {
   type    = string
-  default = "c7i-flex.large"
+  default = "t3.medium"
 }
 variable "api_allowed_cidrs" {
   type        = list(string)
@@ -15,7 +15,7 @@ module "eks" {
   version = "~> 20.24"
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.34"
+  cluster_version = "1.30"
   vpc_id          = var.vpc_id
   subnet_ids      = var.subnet_ids
 
@@ -36,7 +36,7 @@ module "eks" {
   eks_managed_node_groups = {
     default = {
       instance_types = [var.node_instance_type]
-      capacity_type  = "ON_DEMAND" # cheaper; fine for a demo
+      capacity_type  = "ON_DEMAND"
       min_size       = 1
       max_size       = 3
       desired_size   = 2
