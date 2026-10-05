@@ -3,7 +3,7 @@ variable "vpc_id" { type = string }
 variable "subnet_ids" { type = list(string) }
 variable "node_instance_type" {
   type    = string
-  default = "t3.micro"
+  default = "t3.medium"
 }
 variable "api_allowed_cidrs" {
   type        = list(string)
@@ -15,9 +15,9 @@ module "eks" {
   version = "~> 20.24"
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.30"
+  cluster_version = "1.34" # Set to 1.34 to prevent version downgrade errors
   vpc_id          = var.vpc_id
-  subnet_ids      = var.subnet_ids
+  subnet_ids      = var.subnet_ids # Will receive module.vpc.private_subnets
 
   enable_irsa                              = true
   enable_cluster_creator_admin_permissions = true
@@ -27,7 +27,7 @@ module "eks" {
   cluster_addons = {
     vpc-cni = {
       most_recent          = true
-      configuration_values = jsonencode({ enableNetworkPolicy = "true" }) # enforce NetworkPolicy
+      configuration_values = jsonencode({ enableNetworkPolicy = "true" })
     }
     coredns    = { most_recent = true }
     kube-proxy = { most_recent = true }
