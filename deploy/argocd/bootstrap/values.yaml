@@ -1,4 +1,4 @@
-repoURL: https://github.com/<YOUR_GH_USER>/devsecops-platform.git
+repoURL: https://github.com/ADITYASURVE123/devsecops-platform.git
 targetRevision: main
 env: dev
 services: [orders-api, inventory-api]
