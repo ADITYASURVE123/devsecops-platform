@@ -1,6 +1,6 @@
 image:
-  repository: "<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/orders-api"
-  tag: "bootstrap"
+  repository: "911784620606.dkr.ecr.ap-south-1.amazonaws.com/orders-api"
+  tag: "fix-20261006164150"
 env:
   ERROR_RATE: "0"
   LATENCY_MS: "0"
