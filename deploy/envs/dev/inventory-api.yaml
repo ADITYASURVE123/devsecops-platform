@@ -1,6 +1,6 @@
 image:
   repository: "911784620606.dkr.ecr.ap-south-1.amazonaws.com/inventory-api"
-  tag: "fix-20261006164150"
+  tag: "fix-20261006164625"
 env:
   ERROR_RATE: "0"
   LATENCY_MS: "0"
