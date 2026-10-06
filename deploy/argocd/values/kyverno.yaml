@@ -3,3 +3,31 @@ admissionController: { replicas: 1 }
 backgroundController: { replicas: 1 }
 cleanupController: { replicas: 1 }
 reportsController: { replicas: 1 }
+
+cleanupJobs:
+  admissionReports:
+    image:
+      repository: bitnamilegacy/kubectl
+      tag: "1.28.5"
+  clusterAdmissionReports:
+    image:
+      repository: bitnamilegacy/kubectl
+      tag: "1.28.5"
+  ephemeralReports:
+    image:
+      repository: bitnamilegacy/kubectl
+      tag: "1.28.5"
+  clusterEphemeralReports:
+    image:
+      repository: bitnamilegacy/kubectl
+      tag: "1.28.5"
+
+policyReportsCleanup:
+  image:
+    repository: bitnamilegacy/kubectl
+    tag: "1.28.5"
+
+webhooksCleanup:
+  image:
+    repository: bitnamilegacy/kubectl
+    tag: "1.28.5"
