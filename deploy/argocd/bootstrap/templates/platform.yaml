@@ -67,7 +67,7 @@ spec:
     automated: { prune: true, selfHeal: true }
     syncOptions: [CreateNamespace=true, SkipDryRunOnMissingResource=true]
     retry: { limit: 10, backoff: { duration: 15s, factor: 2, maxDuration: 5m } }
-{{- if eq .Values.externalSecrets.enabled "true" }}
+{{- if .Values.externalSecrets.enabled }}
 ---
 {{ include "helmapp" (dict "name" "external-secrets" "wave" "0" "chartRepo" "https://charts.external-secrets.io" "chart" "external-secrets" "version" "0.10.4" "valuesFile" "$values/deploy/argocd/values/external-secrets.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "external-secrets" "extraValues" (dict "serviceAccount" (dict "annotations" (dict "eks.amazonaws.com/role-arn" .Values.externalSecrets.roleArn)))) }}
 ---

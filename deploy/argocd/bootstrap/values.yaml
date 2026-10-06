@@ -3,6 +3,6 @@ targetRevision: main
 env: dev
 services: [orders-api, inventory-api]
 externalSecrets:
-  enabled: "false"
+  enabled: false
   roleArn: ""
   region: ap-south-1
