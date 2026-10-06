@@ -1,23 +1,24 @@
-# Lean install for small clusters (single replicas). Use 3 admission replicas for real HA.
 admissionController: { replicas: 1 }
 backgroundController: { replicas: 1 }
 cleanupController: { replicas: 1 }
 reportsController: { replicas: 1 }
+
+clusterAdmissionReports:
+  image:
+    repository: bitnamilegacy/kubectl
+    tag: "1.28.5"
+
+clusterEphemeralReports:
+  image:
+    repository: bitnamilegacy/kubectl
+    tag: "1.28.5"
 
 cleanupJobs:
   admissionReports:
     image:
       repository: bitnamilegacy/kubectl
       tag: "1.28.5"
-  clusterAdmissionReports:
-    image:
-      repository: bitnamilegacy/kubectl
-      tag: "1.28.5"
   ephemeralReports:
-    image:
-      repository: bitnamilegacy/kubectl
-      tag: "1.28.5"
-  clusterEphemeralReports:
     image:
       repository: bitnamilegacy/kubectl
       tag: "1.28.5"
