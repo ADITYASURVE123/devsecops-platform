@@ -183,11 +183,16 @@ pipeline {
           // [skip ci] prevents the config commit from re-triggering the pipeline (SCM Skip plugin).
           // Jenkins only edits Git; Argo CD does the deploy. No kubectl from Jenkins.
           sh '''
+            set +x
             git config user.name "jenkins-ci"; git config user.email "jenkins@localhost"
             git add deploy/envs/dev
             git diff --cached --quiet && { echo "no change"; exit 0; }
             git commit -m "ci: deploy ${IMAGE_TAG} [skip ci]"
-            git push "https://${GH_USER}:${GH_TOKEN}@$(git remote get-url origin | sed 's#https://##')" HEAD:main
+            askpass=$(mktemp)
+            trap 'rm -f "$askpass"' EXIT
+            printf '%s\n' '#!/bin/sh' 'case "$1" in' '  *Username*) printf "%s\n" x-access-token ;;' '  *) printf "%s\n" "$GH_TOKEN" ;;' 'esac' > "$askpass"
+            chmod 700 "$askpass"
+            GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0 git push origin HEAD:main
           '''
         }
       }
