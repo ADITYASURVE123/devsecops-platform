@@ -58,6 +58,11 @@ pipeline {
     stage('SonarQube quality gate') {
       steps {
         script {
+          sh '''
+            rm -f "$WORKSPACE/.scannerwork/report-task.txt" \
+              "$WORKSPACE/.scannerwork-orders-api/report-task.txt" \
+              "$WORKSPACE/.scannerwork-inventory-api/report-task.txt"
+          '''
           env.SERVICES.split(' ').each { svc ->
             withSonarQubeEnv('sonarqube') {   // Manage Jenkins > System > SonarQube servers
               sh """
@@ -68,6 +73,7 @@ pipeline {
                   -v "\$WORKSPACE/.scannerwork-${svc}:/tmp/.scannerwork" \
                   sonarsource/sonar-scanner-cli:11.0
                 cp "\$WORKSPACE/.scannerwork-${svc}/report-task.txt" "\$WORKSPACE/.scannerwork/report-task.txt"
+                rm -f "\$WORKSPACE/.scannerwork-${svc}/report-task.txt"
                 chmod 755 "\$WORKSPACE/.scannerwork-${svc}"
               """
             }
