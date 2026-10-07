@@ -9,10 +9,6 @@ metadata:
     argocd.argoproj.io/sync-wave: {{ .wave | quote }}
 spec:
   project: default
-  {{ if .ignoreDifferences }}
-  ignoreDifferences:
-{{ toYaml .ignoreDifferences | indent 4 }}
-  {{ end }}
   sources:
     - repoURL: {{ .chartRepo }}
       chart: {{ .chart }}
@@ -32,11 +28,6 @@ spec:
     namespace: {{ .ns }}
   syncPolicy:
     automated: { prune: true, selfHeal: true }
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
-      {{ if .respectIgnoreDifferences }}
-      - RespectIgnoreDifferences=true
-      {{ end }}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
     retry: { limit: 10, backoff: { duration: 15s, factor: 2, maxDuration: 5m } }
 {{- end -}}
