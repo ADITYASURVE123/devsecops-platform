@@ -85,7 +85,10 @@ pipeline {
 
     stage('Trivy filesystem scan') {
       steps {
-        sh 'docker run --rm -v "$WORKSPACE:/src" $TRIVY fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 1 --no-progress /src/services /src/deploy'
+        sh '''
+          docker run --rm -v "$WORKSPACE:/src" "$TRIVY" fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 1 --no-progress /src/services
+          docker run --rm -v "$WORKSPACE:/src" "$TRIVY" fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 1 --no-progress /src/deploy
+        '''
       }
     }
 
