@@ -2,6 +2,6 @@ image:
   repository: "911784620606.dkr.ecr.ap-south-1.amazonaws.com/orders-api"
   tag: "9cfa7c97"
 env:
-  RELEASE_STAMP: "1791367986"
-  ERROR_RATE: "0"
-  LATENCY_MS: "0"
+  RELEASE_STAMP: "1791368004"
+  ERROR_RATE: "0.4"
+  LATENCY_MS: "700"
