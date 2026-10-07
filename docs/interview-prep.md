@@ -1,6 +1,6 @@
 # 25 interview questions with project-specific answers
 
-Use your own measured numbers where marked. Do not quote numbers you have not measured.
+Use your own measured numbers where marked. Do not quote numbers you have not measured. In particular, configuration for a control is not evidence that its live behavior has been demonstrated.
 
 ## CI/CD
 1. **Walk me through the pipeline.** Push triggers Jenkins multibranch via webhook. Gitleaks, ruff, pytest with an 80% coverage gate, SonarQube gate, Trivy filesystem scan, image build, Trivy image scan plus an SBOM. On main only: push to ECR and commit an image-tag bump to Git. Argo CD does the deploy.
@@ -19,7 +19,7 @@ Use your own measured numbers where marked. Do not quote numbers you have not me
 12. **What is IRSA?** The EKS OIDC provider lets a ServiceAccount assume an IAM role. Each pod gets only its own permissions; External Secrets can read `/devsecops/*` and nothing else.
 
 ## Progressive delivery
-13. **How does the canary decide to abort?** Background analysis queries Prometheus every 20 s for error ratio and p95 latency of canary pods. Two failures abort the rollout and traffic returns to stable.
+13. **How is the canary intended to decide whether to continue?** Background analysis queries Prometheus for error ratio and p95 latency for the canary. The rollout configuration is designed to abort after failed analysis and leave traffic on the stable version. The bad-release abort/rollback has not yet been verified end to end, so describe it as intended behavior until you have observed the failed AnalysisRun and stable ReplicaSet.
 14. **How do you measure only the canary?** The ServiceMonitor copies the `rollouts-pod-template-hash` pod label onto metrics, and the query filters on the rollout's latest hash.
 15. **What if there is no traffic?** An empty query result would give a false pass or false fail. The success condition treats empty as healthy, and a loadgen deployment guarantees traffic in the demo. In production you would require a minimum request volume before trusting the result.
 16. **Why 25/50/100 and not 10/50/100?** With replica-based splitting and 4 replicas, 10% is not representable. Exact weights need an ingress or mesh traffic router (documented upgrade path).
@@ -27,11 +27,11 @@ Use your own measured numbers where marked. Do not quote numbers you have not me
 ## Terraform / AWS
 17. **How is state managed?** S3 backend with versioning, encryption, public access blocked, and native lockfile locking (Terraform 1.10+), so no DynamoDB table is needed.
 18. **Why wrap community modules?** VPC and EKS are solved, well-tested problems; the wrapper limits the interface to what this project needs. I can explain what the modules create (subnets, route tables, NAT, OIDC provider, node groups).
-19. **How do you control cost?** Budget alerts, SPOT nodes, single NAT, `make eks-down`, stopping Jenkins, and developing on kind. Measured session cost: (your Cost Explorer number).
+19. **How do you control cost?** Develop and test locally with kind, configure a budget alert before provisioning, use the provided teardown path, and stop Jenkins when it is idle. EKS, NAT, EC2, storage, and data transfer can still incur charges; I do not claim a measured session cost without checking Cost Explorer.
 20. **Why no SSH on the Jenkins box?** SSM Session Manager gives IAM-authenticated, logged access without an open port.
 
 ## Observability / SRE
-21. **What is your SLO and how is it computed?** 99.5% availability (non-5xx) over 30 days, from `http_requests_total`. Error budget remaining = 1 - (observed error ratio / allowed error ratio).
+21. **What SLO does the project model?** The repository includes SLO/error-budget observability configuration based on request metrics. Treat the configured objective as a target, not a measured service-level result; confirm the exact objective and query in the current dashboard/rules before quoting a percentage. Error-budget remaining is derived from the observed error ratio relative to the allowed error ratio.
 22. **What do your alerts catch and why those?** High error rate and fast budget burn (user impact), p95 latency, crashloops, node pressure, aborted rollouts. Each links to a runbook.
 23. **Golden signals in your dashboards?** Traffic, errors, latency (p95), saturation (CPU), plus rollout and Jenkins views.
 

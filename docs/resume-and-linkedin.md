@@ -22,14 +22,16 @@ Collect these before adding numerical claims:
 | Demo cost | AWS Cost Explorer for the measured dates |
 | Rebuild time | Timed clean kind run or Terraform apply-to-healthy interval |
 
-## Resume bullets
+## Resume-ready project entry
 
-- Built a Jenkins CI/CD pipeline for two Python/FastAPI services with automated testing and security/quality tooling; a successful main-branch build published both container images to Amazon ECR.
-- Deployed the services to Amazon EKS in `ap-south-1` with Argo CD GitOps and Argo Rollouts; verified healthy four-replica rollouts and a successful Prometheus-analyzed canary release.
-- Automated AWS infrastructure provisioning with Terraform and configured Jenkins to publish images using instance-profile permissions rather than static AWS access keys.
-- Added Prometheus/Grafana/Alertmanager observability, Kyverno admission policies, Kubernetes workload hardening, and an advisory LLM code-review step that cannot override deterministic CI gates.
+**DevSecOps Delivery Platform | Personal Project**\
+*AWS EKS, Terraform, Jenkins, Docker, Amazon ECR, Argo CD, Argo Rollouts, Prometheus, Grafana, Python*
 
-Use these as a starting point, and remove any component you cannot explain or demonstrate in an interview. Do not add rollback, SLO, coverage, finding-count, pipeline-time, or cost metrics until you have collected the corresponding evidence.
+- Built a Jenkins CI/CD pipeline for two Python/FastAPI services with automated testing and security/quality tooling; a successful main-branch build published both service images to Amazon ECR.
+- Deployed the services to Amazon EKS in `ap-south-1` using Terraform and Argo CD GitOps; verified healthy four-replica rollouts and a successful Prometheus-analyzed canary release.
+- Added least-privilege AWS image-publishing access, Kubernetes workload and admission-policy hardening, observability dashboards/alerts, and an advisory LLM reviewer that cannot override deterministic CI gates.
+
+Select the bullets that match the role, and remove any component you cannot explain or demonstrate in an interview. Do not add rollback, SLO, coverage, finding-count, pipeline-time, or cost metrics until you have collected the corresponding evidence. The bad-release automatic rollback is still pending end-to-end verification.
 
 ## LinkedIn summary (one paragraph)
 I built an AI-assisted DevSecOps delivery platform for two Python services on Amazon EKS in `ap-south-1`. Jenkins automates CI and publishes container images to ECR using instance-profile permissions; Argo CD manages deployment from Git, and Argo Rollouts performs canary releases with Prometheus analysis. I verified healthy service rollouts and a successful canary, and added Terraform infrastructure, observability, Kyverno policies, and an advisory LLM review step that cannot bypass deterministic CI gates. Automatic rollback of a deliberately bad release is the remaining end-to-end validation. Repository: [link].
