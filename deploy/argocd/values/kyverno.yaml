@@ -8,18 +8,22 @@ cleanupJobs:
     image:
       repository: bitnamilegacy/kubectl
       tag: "1.28.5"
+      pullPolicy: IfNotPresent
   clusterAdmissionReports:
     image:
       repository: bitnamilegacy/kubectl
       tag: "1.28.5"
+      pullPolicy: IfNotPresent
   ephemeralReports:
     image:
       repository: bitnamilegacy/kubectl
       tag: "1.28.5"
+      pullPolicy: IfNotPresent
   clusterEphemeralReports:
     image:
       repository: bitnamilegacy/kubectl
       tag: "1.28.5"
+      pullPolicy: IfNotPresent
 
 policyReportsCleanup:
   image:
