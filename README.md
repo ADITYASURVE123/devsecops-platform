@@ -6,7 +6,7 @@ A production-style delivery platform for two small FastAPI services:
 
 **Design principle: AI advises, deterministic checks decide.** The LLM step can comment but never block, approve or promote.
 
-> Status: this repo was generated and statically checked (YAML parse, unit tests for the AI reviewer, shell/Make dry-run). Terraform, Helm rendering and the live cluster flows have **not** been executed yet. Follow `docs/build-guide.md` phase by phase and fix what your environment shows. Screenshots/GIFs and measured numbers are yours to add.
+> **Project status (October 7, 2026):** The platform has been deployed to AWS EKS in `ap-south-1`. Jenkins main build #10 succeeded and pushed both service images to ECR; Argo CD deployments, four-replica service rollouts, and both API health endpoints were verified. A good `orders-api` canary completed successfully, including a successful Prometheus analysis run. The bad-release automatic-abort/rollback scenario has **not** yet been verified end to end, so it is not claimed as completed. See [resume evidence and walkthrough](docs/resume-and-linkedin.md) for the verified scope and remaining validation.
 
 ## Architecture
 See [docs/architecture.md](docs/architecture.md) (Mermaid diagram) and [docs/decisions.md](docs/decisions.md) (12 decisions, including trade-offs).
@@ -44,6 +44,8 @@ AWS regional resources and the Terraform state bucket are configured for `ap-sou
 
 The project rejects other region values in Make and Terraform. AWS IAM and AWS Budgets are account-global services; their roles and budget alert are associated with this deployment but do not reside in a particular AWS region.
 
+The steps above describe a fresh deployment. For the already-running demo, the verified evidence is limited to the items in the project status above; do not treat a successful good-release rollout as proof that automatic rollback works.
+
 ## Failure handling
 Runbooks for the three required incidents: [bad deploy](docs/runbooks/bad-deploy.md), [pod crashloop](docs/runbooks/pod-crashloop.md), [high latency](docs/runbooks/high-latency.md). Each maps to a Prometheus alert.
 
@@ -55,4 +57,6 @@ Runbooks for the three required incidents: [bad deploy](docs/runbooks/bad-deploy
 - Grafana admin password in values is demo-only.
 
 ## Lessons learned
-(Fill in after you build it: what broke, what you changed, what you measured.)
+- A Kubernetes controller can default omitted fields in live objects; Argo CD may then report persistent drift even when the workload is healthy. The Kyverno CronJob drift was resolved by matching the pull policy explicitly and narrowly ignoring only the defaulted pod-template metadata.
+- A successful Argo CD sync and a successful rollout are separate signals. Verify the application revision, rollout phase, analysis result, and stable ReplicaSet before describing a release as complete.
+- Keep demo failure injection out of the final deployment state. The dev `orders-api` values are restored to zero error rate and latency in this change; confirm Argo CD and the live rollout have reconciled before leaving the demo running.

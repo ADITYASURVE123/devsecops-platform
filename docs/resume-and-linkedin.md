@@ -1,26 +1,41 @@
 # Resume bullets, LinkedIn, walkthrough, next steps
 
-## What to measure (do this before writing bullets; never invent numbers)
-| Metric | How to measure |
-|---|---|
-| Pipeline duration | Average of the last 10 main builds in the Jenkins dashboard (Prometheus plugin) |
-| Time to detect + auto-rollback a bad release | Timestamp push of the bad commit, then `RolloutAborted` alert / rollout status in Argo; use the Argo CD history and rollout events |
-| Scan findings fixed | Trivy report counts HIGH/CRITICAL before vs after fixing, saved from build logs |
-| Coverage | Coverage % from the pytest report |
-| Cost per demo session | AWS Cost Explorer for the session day |
-| Rebuild reproducibility | Time for `make destroy && make up` (kind) and terraform apply to Healthy (EKS) |
+## Verified project evidence
 
-## Resume bullets (fill the brackets with YOUR measured values; delete a bullet if you did not measure it)
-- Built a Jenkins CI pipeline for 2 Python microservices with Gitleaks, Trivy, SonarQube and pytest quality gates; fixed [N] HIGH/CRITICAL findings and held coverage at [X]%, with an average build time of [M] min.
-- Implemented GitOps delivery on AWS EKS using Argo CD app-of-apps and Argo Rollouts canaries with Prometheus-based analysis; demonstrated automatic rollback of a faulty release in [T] seconds.
-- Provisioned VPC, EKS, ECR and Jenkins with Terraform (remote state, IRSA, instance-profile auth, no static AWS keys); reduced idle spend with teardown automation and budget alerts, with a typical demo session costing about $[C].
-- Designed Prometheus/Grafana/Alertmanager observability with a 99.5% availability SLO, error-budget panels and 3 incident runbooks; added Kyverno policies, NetworkPolicies, HPA and PDBs; built an advisory LLM PR reviewer (Ollama) that cannot block deploys.
+The following statements are supported by the deployment and CI evidence collected on October 7, 2026:
+
+- AWS EKS deployment in `ap-south-1`; Jenkins main build #10 completed successfully and pushed the `orders-api` and `inventory-api` images to ECR.
+- Argo CD reported the applications Synced and Healthy. Both APIs returned `{"status":"ok"}`, and each service had four available replicas.
+- The good `orders-api` canary completed with four available replicas and a successful AnalysisRun.
+- The platform includes Jenkins security/quality stages, GitOps deployment, Terraform infrastructure, Prometheus-based canary analysis, Kyverno policies, and an advisory LLM reviewer. Do not turn implemented capability into an unmeasured performance or security outcome.
+
+**Still to verify:** the bad-release analysis must fail and the rollout must return to the previously stable ReplicaSet without manually restoring the manifest. The bad-release commit was pushed, but the last recorded Argo CD check still showed the prior revision. Therefore, no automatic rollback duration or completed rollback is claimed here. The dev `orders-api` failure-injection values have been restored to zero in the repository; verify Argo CD sync and the live rollout before leaving the cluster running.
+
+Collect these before adding numerical claims:
+
+| Metric | Evidence to collect |
+|---|---|
+| Pipeline duration | Jenkins build history; report the sample size and range or average |
+| Bad-release rollback | Argo CD revision, failed AnalysisRun, rollout events, and stable ReplicaSet before/after |
+| Scan findings | Trivy reports from the relevant build; distinguish findings from findings fixed |
+| Test coverage | pytest coverage report |
+| Demo cost | AWS Cost Explorer for the measured dates |
+| Rebuild time | Timed clean kind run or Terraform apply-to-healthy interval |
+
+## Resume bullets
+
+- Built a Jenkins CI/CD pipeline for two Python/FastAPI services with automated testing and security/quality tooling; a successful main-branch build published both container images to Amazon ECR.
+- Deployed the services to Amazon EKS in `ap-south-1` with Argo CD GitOps and Argo Rollouts; verified healthy four-replica rollouts and a successful Prometheus-analyzed canary release.
+- Automated AWS infrastructure provisioning with Terraform and configured Jenkins to publish images using instance-profile permissions rather than static AWS access keys.
+- Added Prometheus/Grafana/Alertmanager observability, Kyverno admission policies, Kubernetes workload hardening, and an advisory LLM code-review step that cannot override deterministic CI gates.
+
+Use these as a starting point, and remove any component you cannot explain or demonstrate in an interview. Do not add rollback, SLO, coverage, finding-count, pipeline-time, or cost metrics until you have collected the corresponding evidence.
 
 ## LinkedIn summary (one paragraph)
-I built an AI-assisted DevSecOps delivery platform on AWS EKS: Jenkins CI with secret, dependency, image and code-quality gates; GitOps deployment through Argo CD; and Argo Rollouts canaries that automatically roll back when Prometheus metrics degrade. Infrastructure is Terraform with keyless AWS auth, observability covers golden signals, SLOs and alerting with runbooks, and Kyverno enforces cluster policy. A local-LLM pull-request reviewer assists reviewers but is deliberately advisory: AI advises, deterministic checks decide. Repo and demo: [link].
+I built an AI-assisted DevSecOps delivery platform for two Python services on Amazon EKS in `ap-south-1`. Jenkins automates CI and publishes container images to ECR using instance-profile permissions; Argo CD manages deployment from Git, and Argo Rollouts performs canary releases with Prometheus analysis. I verified healthy service rollouts and a successful canary, and added Terraform infrastructure, observability, Kyverno policies, and an advisory LLM review step that cannot bypass deterministic CI gates. Automatic rollback of a deliberately bad release is the remaining end-to-end validation. Repository: [link].
 
 ## 2-minute walkthrough script
-"This project is a delivery platform for two small Python services. The services are trivial on purpose; the platform is the point. When I open a pull request, Jenkins runs secret scanning, lint, tests with a coverage gate, a SonarQube quality gate and Trivy scans, and a local LLM posts an advisory review. That review can never block anything; deterministic checks decide. On main, Jenkins builds the image, scans it, generates an SBOM, pushes to ECR using the instance profile, so there are no stored AWS keys, and then commits an image-tag change to Git. Jenkins never touches the cluster. Argo CD notices the commit and deploys through Argo Rollouts, shifting traffic in steps while a Prometheus analysis watches error rate and p95 latency of just the canary pods. I demoed a good release that promotes fully and a bad release that fails analysis and rolls back automatically in [T] seconds. Grafana shows golden signals and an error budget for a 99.5% SLO, Alertmanager routes alerts to Slack with runbooks, and Kyverno, NetworkPolicies, HPAs and PDBs harden the cluster. Everything is reproducible with Terraform and a Makefile, and I run it on kind first and EKS only for short demos to control cost. If I had more time I would add exact traffic splitting with an ingress and image signing with cosign."
+"This project is a delivery platform for two small Python services; the platform is the point. Jenkins runs the configured test, security, and quality stages, and an LLM can provide advisory feedback but cannot make deployment decisions. On main, Jenkins builds and scans images, generates an SBOM, pushes to ECR using instance-profile permissions, and updates the GitOps repository; Jenkins does not deploy directly to Kubernetes. Argo CD applies the change and Argo Rollouts performs a canary with Prometheus analysis of error rate and latency. I verified a good release through a successful analysis and healthy four-replica rollout. The bad-release automatic rollback is still being validated, so I do not claim it as a completed demo. The project also includes Terraform-managed AWS infrastructure, observability, Kyverno policies, and Kubernetes workload hardening. The AWS demo is configured for `ap-south-1`; I use teardown steps to limit ongoing costs."
 
 ## What I'd improve next
 1. Cosign image signing plus a Kyverno `verifyImages` policy.

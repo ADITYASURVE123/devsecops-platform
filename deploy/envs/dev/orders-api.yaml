@@ -3,5 +3,5 @@ image:
   tag: "9cfa7c97"
 env:
   RELEASE_STAMP: "1791368004"
-  ERROR_RATE: "0.4"
-  LATENCY_MS: "700"
+  ERROR_RATE: "0"
+  LATENCY_MS: "0"
