@@ -3,7 +3,7 @@
 ---
 {{ include "helmapp" (dict "name" "kube-prometheus-stack" "wave" "0" "chartRepo" "https://prometheus-community.github.io/helm-charts" "chart" "kube-prometheus-stack" "version" "65.5.0" "valuesFile" "$values/observability/kube-prometheus-stack-values.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "monitoring") }}
 ---
-{{ include "helmapp" (dict "name" "kyverno" "wave" "0" "chartRepo" "https://kyverno.github.io/kyverno" "chart" "kyverno" "version" "3.2.7" "valuesFile" "$values/deploy/argocd/values/kyverno.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "kyverno") }}
+{{ include "helmapp" (dict "name" "kyverno" "wave" "0" "chartRepo" "https://kyverno.github.io/kyverno" "chart" "kyverno" "version" "3.2.7" "valuesFile" "$values/deploy/argocd/values/kyverno.yaml" "repoURL" .Values.repoURL "rev" .Values.targetRevision "ns" "kyverno" "respectIgnoreDifferences" true "ignoreDifferences" (list (dict "group" "batch" "kind" "CronJob" "namespace" "kyverno" "jsonPointers" (list "/spec/jobTemplate/spec/template/spec/containers/0/imagePullPolicy")))) }}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
