@@ -177,7 +177,7 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'github-token-user', usernameVariable: 'GH_USER', passwordVariable: 'GH_TOKEN')]) {
           script {
             env.SERVICES.split(' ').each { svc ->
-              sh "./scripts/bump-image-tag.sh ${svc} ${IMAGE_TAG} dev"
+              sh "bash ./scripts/bump-image-tag.sh ${svc} ${IMAGE_TAG} dev"
             }
           }
           // [skip ci] prevents the config commit from re-triggering the pipeline (SCM Skip plugin).
