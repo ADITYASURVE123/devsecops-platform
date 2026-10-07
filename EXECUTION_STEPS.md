@@ -174,23 +174,18 @@ kubectl get nodes
 
 ---
 
-## Phase 4 — Push This Repo to GitHub (complete before `make eks-up`)
+## Phase 4 — Verify the GitHub Repository (complete before `make eks-up`)
 
-Argo CD pulls from GitHub, so your repo must be public (or use a deploy key for private).
+Argo CD pulls this repository from GitHub. The project repository is `https://github.com/ADITYASURVE123/devsecops-platform`. If you are deploying your own fork, use your fork URL in the commands and Argo CD values instead. For a private repository, configure repository credentials for Argo CD before syncing.
 
-### 4.1 Create a new GitHub repo
-
-Go to https://github.com/new — name it `devsecops-platform`, leave it empty, copy the HTTPS URL.
-
-### 4.2 Push
+### 4.1 Confirm the repository remote
 
 ```bash
-# From the repo root:
-git remote set-url origin https://github.com/<YOUR_GITHUB_USERNAME>/devsecops-platform.git
-git push -u origin main
+# From the repo root; confirm the remote points to the intended repository.
+git remote -v
 ```
 
-> Note your repo URL — e.g. `https://github.com/ADITYASURVE123/devsecops-platform.git`
+Do not create a duplicate repository or push directly to `main` just to follow this guide. If working from a fork or a new local clone that has no remote configured, set the correct `origin` URL and push your intended branch using your normal review process.
 
 ---
 
@@ -201,7 +196,7 @@ This installs Argo CD on EKS and applies the root App-of-Apps that manages every
 ```bash
 # From the repo root:
 ENV=dev \
-REPO_URL=https://github.com/<YOUR_GITHUB_USERNAME>/devsecops-platform.git \
+REPO_URL=https://github.com/ADITYASURVE123/devsecops-platform.git \
 ESO_ENABLED=true \
 ESO_ROLE_ARN=$(cd infra/terraform/envs/demo && terraform output -raw external_secrets_role_arn) \
 AWS_REGION=ap-south-1 \

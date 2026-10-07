@@ -5,7 +5,7 @@ This guide is a learning path for understanding and reproducing the platform. Th
 Each phase ends with questions to help you explain the design in an interview. For a low-cost first pass, use the local `kind` path; the AWS path incurs charges.
 
 ## Phase 0: repo + decisions
-Done in this repo (`docs/architecture.md`, `docs/decisions.md`). Push to GitHub as `devsecops-platform` (public) and replace `<YOUR_GH_USER>` in `deploy/argocd/bootstrap/values.yaml`.
+Architecture and decisions are documented in `docs/architecture.md` and `docs/decisions.md`. This project is already hosted at `https://github.com/ADITYASURVE123/devsecops-platform`; if you fork it, set your fork URL in `deploy/argocd/bootstrap/values.yaml` before bootstrapping Argo CD.
 Q: Why advisory AI? Why kind first? What is an ADR?
 
 ## Phase 1: app + Docker + kind + Helm
