@@ -58,11 +58,23 @@ pipeline {
     stage('SonarQube quality gate') {
       steps {
         script {
+          sh '''
+            rm -f "$WORKSPACE/.scannerwork/report-task.txt" \
+              "$WORKSPACE/.scannerwork-orders-api/report-task.txt" \
+              "$WORKSPACE/.scannerwork-inventory-api/report-task.txt"
+          '''
           env.SERVICES.split(' ').each { svc ->
             withSonarQubeEnv('sonarqube') {   // Manage Jenkins > System > SonarQube servers
               sh """
+                mkdir -p "\$WORKSPACE/.scannerwork-${svc}" "\$WORKSPACE/.scannerwork"
+                chmod 1777 "\$WORKSPACE/.scannerwork-${svc}"
                 docker run --rm -e SONAR_HOST_URL="\$SONAR_HOST_URL" -e SONAR_TOKEN="\$SONAR_AUTH_TOKEN" \
-                  -v "\$WORKSPACE/services/${svc}:/usr/src" sonarsource/sonar-scanner-cli:11.0
+                  -v "\$WORKSPACE/services/${svc}:/usr/src" \
+                  -v "\$WORKSPACE/.scannerwork-${svc}:/tmp/.scannerwork" \
+                  sonarsource/sonar-scanner-cli:11.0
+                cp "\$WORKSPACE/.scannerwork-${svc}/report-task.txt" "\$WORKSPACE/.scannerwork/report-task.txt"
+                rm -f "\$WORKSPACE/.scannerwork-${svc}/report-task.txt"
+                chmod 755 "\$WORKSPACE/.scannerwork-${svc}"
               """
             }
             timeout(time: 5, unit: 'MINUTES') { waitForQualityGate abortPipeline: true }
@@ -73,7 +85,10 @@ pipeline {
 
     stage('Trivy filesystem scan') {
       steps {
-        sh 'docker run --rm -v "$WORKSPACE:/src" $TRIVY fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 1 --no-progress /src/services /src/deploy'
+        sh '''
+          docker run --rm -v "$WORKSPACE:/src" "$TRIVY" fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 1 --no-progress /src/services
+          docker run --rm -v "$WORKSPACE:/src" "$TRIVY" fs --scanners vuln,misconfig --severity HIGH,CRITICAL --exit-code 1 --no-progress /src/deploy
+        '''
       }
     }
 
