@@ -61,8 +61,14 @@ pipeline {
           env.SERVICES.split(' ').each { svc ->
             withSonarQubeEnv('sonarqube') {   // Manage Jenkins > System > SonarQube servers
               sh """
+                mkdir -p "\$WORKSPACE/.scannerwork-${svc}" "\$WORKSPACE/.scannerwork"
+                chmod 1777 "\$WORKSPACE/.scannerwork-${svc}"
                 docker run --rm -e SONAR_HOST_URL="\$SONAR_HOST_URL" -e SONAR_TOKEN="\$SONAR_AUTH_TOKEN" \
-                  -v "\$WORKSPACE/services/${svc}:/usr/src" sonarsource/sonar-scanner-cli:11.0
+                  -v "\$WORKSPACE/services/${svc}:/usr/src" \
+                  -v "\$WORKSPACE/.scannerwork-${svc}:/tmp/.scannerwork" \
+                  sonarsource/sonar-scanner-cli:11.0
+                cp "\$WORKSPACE/.scannerwork-${svc}/report-task.txt" "\$WORKSPACE/.scannerwork/report-task.txt"
+                chmod 755 "\$WORKSPACE/.scannerwork-${svc}"
               """
             }
             timeout(time: 5, unit: 'MINUTES') { waitForQualityGate abortPipeline: true }
